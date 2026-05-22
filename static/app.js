@@ -3,6 +3,9 @@ const radioState = {
     isOn: false,
     selectedFrequencies: [],
     isLoading: false,
+    // This prevents the periodic API status check from overwriting user inputs
+    // if they are in the process of selecting different frequencies when loadStateFromAPI is called
+    userChanges: false,
 };
 
 // DOM elements
@@ -19,7 +22,7 @@ function init() {
     loadStateFromAPI();
 
     // Periodically resync state, this also refreshes the inactivity timer
-    setInterval(loadStateFromAPI, 30 * 1000);
+    setInterval(loadStateFromAPI, 15 * 1000);
 }
 
 // Render frequency buttons
@@ -43,6 +46,7 @@ function handleFrequencyToggle(e) {
     const index = parseInt(e.currentTarget.dataset.index);
     const freq = FREQUENCIES[index];
     const freqString = freq.mhz.toString();
+    radioState.userChanges = true;
 
     if (radioState.selectedFrequencies.includes(freqString)) {
         radioState.selectedFrequencies = radioState.selectedFrequencies.filter(
@@ -65,6 +69,9 @@ async function handlePowerToggle(e) {
         alert('Please select at least one frequency before turning ON the radio');
         return;
     }
+
+    // Power button and refresh flush user changes
+    radioState.userChanges = false;
 
     radioState.isOn = newState;
     radioState.isLoading = true;
@@ -157,6 +164,9 @@ async function handleRefresh() {
         return;
     }
 
+    // Power button and refresh flush user changes
+    radioState.userChanges = false;
+
     radioState.isLoading = true;
     updateUI();
 
@@ -168,8 +178,14 @@ async function handleRefresh() {
 
 // API Requests
 async function loadStateFromAPI() {
-    let resp = await fetch(`${API_BASE_URL}/api/status`);
-    let data = await resp.json();
+    // The API call has to be made no matter what to tell the server we're still listening
+    let data = await getAPIStatus();
+
+    if (radioState.userChanges) {
+        // The user is selecting other frequencies, don't overwrite their changes
+        return;
+    }
+
     if (data === null) {
         radioState.isOn = false;
     } else {
@@ -177,6 +193,12 @@ async function loadStateFromAPI() {
         radioState.selectedFrequencies = data['frequencies'];
     }
     updateUI();
+}
+
+async function getAPIStatus() {
+    let resp = await fetch(`${API_BASE_URL}/api/status`);
+    let data = await resp.json();
+    return data;
 }
 
 // Initialize on page load
