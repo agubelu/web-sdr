@@ -2,8 +2,6 @@
 const radioState = {
     isOn: false,
     selectedFrequencies: [],
-    fmSelected: false,
-    fmFrequency: '',
     isLoading: false,
 };
 
@@ -13,8 +11,6 @@ const refreshBtn = document.getElementById('refreshBtn');
 const frequenciesGrid = document.getElementById('frequenciesGrid');
 const statusText = document.getElementById('statusText');
 const selectedCount = document.getElementById('selectedCount');
-const fmButton = document.getElementById('fmButton');
-const fmFrequencyInput = document.getElementById('fmFrequency');
 
 // Initialize the UI
 function init() {
@@ -53,35 +49,20 @@ function handleFrequencyToggle(e) {
             f => f !== freqString
         );
     } else {
-        radioState.fmSelected = false;
         radioState.selectedFrequencies.push(freqString);
     }
 
     updateUI();
 }
 
-// Handle FM button click
-function handleFMToggle() {
-    radioState.fmSelected = !radioState.fmSelected;
-    if (radioState.fmSelected) {
-        radioState.selectedFrequencies = [];
-    }
-    updateUI();
-}
-
-// Handle FM frequency input change
-function handleFMFrequencyChange(e) {
-    radioState.fmFrequency = e.target.value;
-}
-
 // Handle power toggle
 async function handlePowerToggle(e) {
     const newState = e.target.checked;
 
-    // Restriction: Can't turn ON without at least one frequency selected or FM enabled with frequency
-    if (newState && radioState.selectedFrequencies.length === 0 && (!radioState.fmSelected || !radioState.fmFrequency)) {
+    // Restriction: Can't turn ON without at least one frequency selected
+    if (newState && radioState.selectedFrequencies.length === 0) {
         e.target.checked = false;
-        alert('Please select at least one frequency or enter an FM frequency before turning ON the radio');
+        alert('Please select at least one frequency before turning ON the radio');
         return;
     }
 
@@ -106,8 +87,6 @@ async function handlePowerToggle(e) {
 function attachEventListeners() {
     powerToggle.addEventListener('change', handlePowerToggle);
     refreshBtn.addEventListener('click', handleRefresh);
-    fmButton.addEventListener('click', handleFMToggle);
-    fmFrequencyInput.addEventListener('change', handleFMFrequencyChange);
 }
 
 // Update UI based on current state
@@ -121,7 +100,7 @@ function updateUI() {
     statusText.className = 'status-text ' + (radioState.isOn ? 'radio-on' : 'radio-off');
 
     // Update selected count
-    const count = radioState.fmSelected ? 1 : radioState.selectedFrequencies.length;
+    const count = radioState.selectedFrequencies.length;
     selectedCount.textContent = `${count} selected`;
 
     // Update refresh button state
@@ -139,13 +118,6 @@ function updateUI() {
             btn.classList.remove('selected');
         }
     });
-
-    // Update FM button state
-    if (radioState.fmSelected) {
-        fmButton.classList.add('selected');
-    } else {
-        fmButton.classList.remove('selected');
-    }
 }
 
 // Handler hook for radio ON - will be expanded to connect to backend
@@ -153,19 +125,12 @@ async function onRadioOn() {
     console.log('Radio turned ON');
 
     let frequenciesToSend = radioState.selectedFrequencies;
-    const isFMMode = radioState.fmSelected && radioState.fmFrequency;
-
-    if (isFMMode) {
-        frequenciesToSend = [radioState.fmFrequency];
-    }
 
     const payload = {
         frequencies: frequenciesToSend,
-        use_fm: isFMMode
     };
 
     console.log('Currently selected frequencies:', frequenciesToSend);
-    console.log('Use FM:', isFMMode);
 
     let resp = await fetch(`${API_BASE_URL}/api/control/on`, {
         method: 'POST',
@@ -186,7 +151,7 @@ async function onRadioOff() {
 
 // Handle refresh button
 async function handleRefresh() {
-    const hasValidSelection = radioState.selectedFrequencies.length > 0 || (radioState.fmSelected && radioState.fmFrequency);
+    const hasValidSelection = radioState.selectedFrequencies.length > 0;
     if (radioState.isOn && !hasValidSelection) {
         alert('Error: Cannot refresh while radio is ON with no frequencies selected');
         return;
@@ -197,8 +162,6 @@ async function handleRefresh() {
 
     console.log('Refresh button clicked');
     console.log('Current selected frequencies:', radioState.selectedFrequencies);
-    console.log('FM selected:', radioState.fmSelected);
-    console.log('FM frequency:', radioState.fmFrequency);
 
     onRadioOn();
 }
@@ -211,7 +174,7 @@ async function loadStateFromAPI() {
         radioState.isOn = false;
     } else {
         radioState.isOn = true;
-        radioState.selectedFrequencies = data;
+        radioState.selectedFrequencies = data['frequencies'];
     }
     updateUI();
 }

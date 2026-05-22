@@ -48,16 +48,19 @@ def off_timer_handle():
 
 ##### Aux functions which must be called holding `radio_lock` #####
 
-def current_status() -> list | None:
+def current_status() -> dict | None:
     global live_radio
-    return None if live_radio is None else live_radio.freqs
+    return None if live_radio is None else {
+        'frequencies': live_radio.freqs,
+    }
 
-def create_or_replace_radio(freqs: list[str]):
+def create_or_replace_radio(data: dict):
     print(f'upserting radio')
     global live_radio, off_timer
 
     if live_radio:
         live_radio.teardown()
+    freqs = data['frequencies']
     live_radio = Radio(freqs)
 
     reset_timer()

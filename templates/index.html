@@ -36,27 +36,6 @@
                 </div>
             </div>
 
-            <div class="fm-section">
-                <h2>FM Radio</h2>
-                <div class="fm-container">
-                    <button id="fmButton" class="fm-btn" aria-label="FM radio">
-                        <div class="fm-label">FM</div>
-                    </button>
-                    <div class="fm-input-group">
-                        <input
-                            type="number"
-                            id="fmFrequency"
-                            class="fm-input"
-                            placeholder="88.1"
-                            step="0.1"
-                            min="76"
-                            max="108"
-                            aria-label="FM frequency in MHz">
-                        <span class="fm-unit">MHz</span>
-                    </div>
-                </div>
-            </div>
-
             <div class="player-section">
                 <audio id="radioPlayer" controls src="http://{{ config.icecast_config.host }}:{{ config.icecast_config.port }}/{{ config.icecast_config.live_mountpoint }}?{{ token }}">
                 </audio>
