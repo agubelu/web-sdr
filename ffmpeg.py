@@ -7,7 +7,7 @@ proc = None
 def start_atc_silence_feed():
     global proc
 
-    icecast_config = config['atc_radio']['icecast']
+    icecast_config = config.atc_radio.icecast
     icecast_url = build_icecast_mount_url(icecast_config, silence=True)
 
     proc = subprocess.Popen([

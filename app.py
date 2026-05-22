@@ -19,9 +19,9 @@ off_timer: Timer | None = None
 def index():
     params = {
         'token': token_hex(8),
-        'stream_url': build_icecast_stream_url(config['atc_radio']['icecast']),
-        'freqs': config['atc_radio']['freqs'],
-        'api_url': f'http://{config["host"]}:{config["port"]}'
+        'stream_url': build_icecast_stream_url(config.atc_radio.icecast),
+        'freqs': config.atc_radio.freqs,
+        'api_url': f'http://{config.host}:{config.port}'
     }
     return render_template('index.html', **params)
 
@@ -79,7 +79,7 @@ def reset_timer():
     if off_timer:
         off_timer.cancel()
 
-    off_timer = Timer(config['max_inactivity'], off_timer_handle)
+    off_timer = Timer(config.max_inactivity, off_timer_handle)
     off_timer.daemon = True
     off_timer.start()
 
@@ -99,7 +99,7 @@ def turn_radio_off():
 if __name__ == '__main__':
     start_atc_silence_feed()
     app.run(
-        host=config['host'],
-        port=config['port'],
+        host=config.host,
+        port=config.port,
         threaded=True,
     )
