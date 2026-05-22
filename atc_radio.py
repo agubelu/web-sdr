@@ -1,5 +1,7 @@
-from config import config, ATCFrequency, rtlairband_config_file_template
 import subprocess
+
+from config import ATCFrequency, config, rtlairband_config_file_template
+
 
 class ATCRadio:
     def __init__(self, freqs: list[str]):

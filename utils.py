@@ -1,5 +1,6 @@
 from config import IcecastConfig
 
+
 def build_icecast_mount_url(icecast_config: IcecastConfig, *, silence: bool = False) -> str:
     username = icecast_config.username
     password = icecast_config.password

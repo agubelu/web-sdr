@@ -1,5 +1,8 @@
+import signal
+import subprocess
+import sys
+
 from config import config
-import subprocess, signal, sys
 from utils import build_icecast_mount_url
 
 proc = None

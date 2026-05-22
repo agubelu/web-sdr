@@ -1,10 +1,11 @@
-from threading import Timer, Lock
 from secrets import token_hex
-from flask import Flask, jsonify, request, render_template
+from threading import Lock, Timer
 
-from radio import ATCRadio, Radio
+from flask import Flask, jsonify, render_template, request
+
 from config import config
 from ffmpeg import start_atc_silence_feed
+from radio import ATCRadio, Radio
 from utils import build_icecast_stream_url
 
 app = Flask(__name__)
