@@ -2,7 +2,7 @@ from threading import Timer, Lock
 from secrets import token_hex
 from flask import Flask, jsonify, request, render_template
 
-from atc_radio import ATCRadio
+from radio import ATCRadio, Radio
 from config import config
 from ffmpeg import start_atc_silence_feed
 from utils import build_icecast_stream_url
@@ -10,7 +10,7 @@ from utils import build_icecast_stream_url
 app = Flask(__name__)
 
 radio_lock = Lock()
-live_radio: ATCRadio | None = None
+live_radio: Radio | None = None
 off_timer: Timer | None = None
 
 ##### Route handling #####
