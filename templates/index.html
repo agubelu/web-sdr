@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Radio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="radio-player">
+            <div class="status-bar">
+                <div class="status-info">
+                    <span id="statusText" class="status-text">Radio OFF</span>
+                    <span id="selectedCount" class="selected-count"></span>
+                </div>
+                <div class="control-group">
+                    <div class="power-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="powerToggle" aria-label="Power toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <button id="refreshBtn" class="btn btn-icon-green" aria-label="Refresh frequencies">
+                        🔄
+                    </button>
+                </div>
+            </div>
+
+            <div class="frequencies-section">
+                <h2>Available Frequencies</h2>
+                <div class="frequencies-grid" id="frequenciesGrid">
+                    <!-- Frequency buttons will be generated here -->
+                </div>
+            </div>
+
+            <div class="fm-section">
+                <h2>FM Radio</h2>
+                <div class="fm-container">
+                    <button id="fmButton" class="fm-btn" aria-label="FM radio">
+                        <div class="fm-label">FM</div>
+                    </button>
+                    <div class="fm-input-group">
+                        <input
+                            type="number"
+                            id="fmFrequency"
+                            class="fm-input"
+                            placeholder="88.1"
+                            step="0.1"
+                            min="76"
+                            max="108"
+                            aria-label="FM frequency in MHz">
+                        <span class="fm-unit">MHz</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-section">
+                <audio id="radioPlayer" controls src="http://{{ config.icecast_config.host }}:{{ config.icecast_config.port }}/{{ config.icecast_config.live_mountpoint }}?{{ token }}">
+                </audio>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = `http://{{ config.host }}:{{ config.port }}`;
+        const FREQUENCIES = {{ config.freqs | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+
+</html>
