@@ -37,15 +37,15 @@
             </div>
 
             <div class="player-section">
-                <audio id="radioPlayer" controls src="http://{{ config.icecast_config.host }}:{{ config.icecast_config.port }}/{{ config.icecast_config.live_mountpoint }}?{{ token }}">
+                <audio id="radioPlayer" controls src="{{ stream_url }}?{{ token }}">
                 </audio>
             </div>
         </div>
     </div>
 
     <script>
-        const API_BASE_URL = `http://{{ config.host }}:{{ config.port }}`;
-        const FREQUENCIES = {{ config.freqs | tojson }};
+        const API_BASE_URL = '{{ api_url }}';
+        const FREQUENCIES = {{ freqs | tojson }};
     </script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>

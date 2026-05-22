@@ -2,21 +2,28 @@ from threading import Timer, Lock
 from secrets import token_hex
 from flask import Flask, jsonify, request, render_template
 
-from atc_radio import Radio
+from atc_radio import ATCRadio
 from config import config
-from ffmpeg import start_silence_feed
+from ffmpeg import start_atc_silence_feed
+from utils import build_icecast_stream_url
 
 app = Flask(__name__)
 
 radio_lock = Lock()
-live_radio: Radio | None = None
+live_radio: ATCRadio | None = None
 off_timer: Timer | None = None
 
 ##### Route handling #####
 
 @app.route('/')
 def index():
-    return render_template('index.html', config=config, token=token_hex(8))
+    params = {
+        'token': token_hex(8),
+        'stream_url': build_icecast_stream_url(config['atc_radio']['icecast']),
+        'freqs': config['atc_radio']['freqs'],
+        'api_url': f'http://{config["host"]}:{config["port"]}'
+    }
+    return render_template('index.html', **params)
 
 @app.get('/api/status')
 def get_status():
@@ -61,7 +68,7 @@ def create_or_replace_radio(data: dict):
     if live_radio:
         live_radio.teardown()
     freqs = data['frequencies']
-    live_radio = Radio(freqs)
+    live_radio = ATCRadio(freqs)
 
     reset_timer()
 
@@ -90,7 +97,7 @@ def turn_radio_off():
 ###################################################################################
 
 if __name__ == '__main__':
-    start_silence_feed()
+    start_atc_silence_feed()
     app.run(
         host=config['host'],
         port=config['port'],

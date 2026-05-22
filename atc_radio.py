@@ -1,19 +1,19 @@
-from config import config, Frequency
+from config import config, ATCFrequency, rtlairband_config_file_template
 import subprocess
 
-class Radio:
+class ATCRadio:
     def __init__(self, freqs: list[str]):
         print(f'new radio with freqs {freqs}')
         self.freqs = freqs
-        frequencies: list[Frequency] = [f for f in config['freqs'] if f.mhz in freqs]
+        frequencies: list[ATCFrequency] = [f for f in config['atc_radio']['freqs'] if f.mhz in freqs]
         freqs_list = ', '.join(f.mhz for f in frequencies)
         thresholds_list = ', '.join(str(f.squelch_snr) for f in frequencies)
         ampfactors_list = ', '.join(str(f.ampfactor) for f in frequencies)
 
-        device_config = config['device_config']
-        icecast_config = config['icecast_config']
+        device_config = config['atc_radio']['device']
+        icecast_config = config['atc_radio']['icecast']
 
-        config_fmt = config_file_template.format(
+        config_fmt = rtlairband_config_file_template.format(
             fft_size=device_config['fft_size'],
             gain=device_config['gain'],
             sample_rate=device_config['sample_rate'],
@@ -30,7 +30,7 @@ class Radio:
             icecast_mount=icecast_config['live_mountpoint'],
         )
 
-        file_path = config['rtl_config_file']
+        file_path = config['atc_radio']['rtl_config_file']
         with open(file_path, 'w') as f:
             f.write(config_fmt)
 
@@ -45,38 +45,3 @@ class Radio:
         self.proc.wait()
         if self.proc.returncode != 0:
             raise OSError(f'Return code {self.proc.returncode}')
-
-config_file_template = '''
-fft_size = {fft_size};
-devices: (
-  {{
-    type = "rtlsdr";
-    index = 0;
-    gain = {gain};
-    mode = "scan"
-    sample_rate = {sample_rate};
-    correction = {correction};
-    channels:
-    (
-      {{
-        freqs = ({freqs});
-        squelch_snr_threshold = ({thresholds});
-        ampfactor = ({ampfactors});
-        highpass = {highpass};
-        lowpass = {lowpass};
-        label = "ATC";
-        outputs: (
-          {{
-            type = "icecast";
-            server = "{icecast_server}";
-            port = {icecast_port};
-            username = "{icecast_username}";
-            password = "{icecast_password}";
-            mountpoint = "{icecast_mount}";
-          }}
-        );
-      }}
-    );
-  }}
-);
-'''
