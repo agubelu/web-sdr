@@ -1,12 +1,21 @@
+import abc
 import subprocess
 
 from config import ATCFrequency, config, rtlairband_config_file_template
 
 
-class ATCRadio:
+class Radio:
+    def __init__(self, freqs: list[str]):
+        self.freqs = freqs
+
+    @abc.abstractmethod
+    def teardown(self):
+        ...
+
+class ATCRadio(Radio):
     def __init__(self, freqs: list[str]):
         print(f'new radio with freqs {freqs}')
-        self.freqs = freqs
+        super().__init__(freqs)
         atc_config = config.atc_radio
 
         frequencies: list[ATCFrequency] = [f for f in atc_config.freqs if f.mhz in freqs]
