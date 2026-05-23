@@ -14,6 +14,7 @@ const refreshBtn = document.getElementById('refreshBtn');
 const frequenciesGrid = document.getElementById('frequenciesGrid');
 const statusText = document.getElementById('statusText');
 const selectedCount = document.getElementById('selectedCount');
+const audioContainer = document.getElementById('audioContainer');
 
 // Initialize the UI
 function init() {
@@ -78,16 +79,10 @@ async function handlePowerToggle(e) {
     updateUI();
 
     if (newState) {
-        onRadioOn();
+        await onRadioOn();
     } else {
-        onRadioOff();
+        await onRadioOff();
     }
-
-    // Simulate server processing - re-enable after 3 seconds
-    setTimeout(() => {
-        radioState.isLoading = false;
-        updateUI();
-    }, 3000);
 }
 
 // Attach event listeners
@@ -144,6 +139,16 @@ async function onRadioOn() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
     });
+
+    // Create and attach audio element only after server confirms
+    const audio = document.createElement('audio');
+    audio.id = 'radioPlayer';
+    audio.controls = true;
+    const cacheBuster = Math.random().toString(36).substring(2, 15);
+    audio.src = `${STREAM_URL}?nocache=${cacheBuster}`;
+    audioContainer.innerHTML = '';
+    audioContainer.appendChild(audio);
+
     radioState.isLoading = false;
     updateUI();
 }
@@ -151,6 +156,7 @@ async function onRadioOn() {
 // Handler hook for radio OFF - will be expanded to connect to backend
 async function onRadioOff() {
     console.log('Radio turned OFF');
+    audioContainer.innerHTML = '';
     let resp = await fetch(`${API_BASE_URL}/api/control/off`, {method: 'POST'});
     radioState.isLoading = false;
     updateUI();
