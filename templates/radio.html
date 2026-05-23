@@ -13,17 +13,17 @@
         <div class="radio-player">
             <div class="status-bar">
                 <div class="status-info">
-                    <span id="statusText" class="status-text">ATC Radio OFF</span>
-                    <span id="selectedCount" class="selected-count"></span>
+                    <span id="atcStatusText" class="status-text">ATC Radio OFF</span>
+                    <span id="atcSelectedCount" class="selected-count"></span>
                 </div>
                 <div class="control-group">
                     <div class="power-toggle">
                         <label class="toggle-switch">
-                            <input type="checkbox" id="powerToggle" aria-label="Power toggle">
+                            <input type="checkbox" id="atcPowerToggle" aria-label="Power toggle">
                             <span class="slider"></span>
                         </label>
                     </div>
-                    <button id="refreshBtn" class="btn btn-icon-green" aria-label="Refresh frequencies">
+                    <button id="atcRefreshBtn" class="btn btn-icon-green" aria-label="Refresh frequencies">
                         🔄
                     </button>
                 </div>
@@ -31,16 +31,17 @@
 
             <div class="frequencies-section">
                 <h2>Available Frequencies</h2>
-                <div class="frequencies-grid" id="frequenciesGrid">
+                <div class="frequencies-grid" id="atcFrequenciesGrid">
                     <!-- Frequency buttons will be generated here -->
                 </div>
             </div>
 
-            <div class="player-section" id="audioContainer">
+            <div class="player-section" id="atcAudioContainer">
                 <!-- Audio element will be created here dynamically -->
             </div>
         </div>
 
+        <br>
         <div class="radio-player">
             <div class="status-bar">
                 <div class="status-info">
@@ -67,7 +68,7 @@
                         <button id="fmDownBtn" class="fm-arrow-btn fm-arrow-down" aria-label="Decrease frequency">▼</button>
                     </div>
                     <div class="fm-input-wrapper">
-                        <input type="number" id="fmFrequencyInput" class="fm-input" min="87.5" max="108.0" step="0.1" value="104.3" aria-label="FM frequency">
+                        <input type="number" id="fmFrequencyInput" class="fm-input" min="87.5" max="108.0" step="0.1" value="95.9" aria-label="FM frequency">
                         <span class="fm-unit">MHz</span>
                     </div>
                 </div>
@@ -82,9 +83,10 @@
     <script>
         const API_BASE_URL = '{{ api_url }}';
         const FREQUENCIES = {{ freqs | tojson }};
-        const STREAM_URL = '{{ stream_url }}';
+        const ATC_STREAM_URL = '{{ atc_stream_url }}';
+        const FM_STREAM_URL = 'TODO';
     </script>
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 
 </html>

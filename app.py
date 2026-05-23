@@ -18,7 +18,8 @@ off_timer: Timer | None = None
 @app.route('/')
 def index():
     params = {
-        'stream_url': build_icecast_stream_url(config.atc_radio.icecast),
+        'atc_stream_url': build_icecast_stream_url(config.atc_radio.icecast),
+        # TODO: 'fm_stream_url': build_icecast_stream_url(config...icecast),
         'freqs': config.atc_radio.freqs,
         'api_url': f'http://{config.host}:{config.port}'
     }
@@ -30,14 +31,14 @@ def get_status():
         reset_timer()
         return jsonify(current_status())
 
-@app.post('/api/control/on')
-def post_control_on():
+@app.post('/api/<kind>/on')
+def post_control_on(kind: str):
     with radio_lock:
         create_or_replace_radio(request.get_json())
     return '', 204
 
-@app.post('/api/control/off')
-def post_control_off():
+@app.post('/api/<kind>/off')
+def post_control_off(kind: str):
     with radio_lock:
         turn_radio_off()
     return '', 204
