@@ -1,3 +1,6 @@
+'use strict';
+import { createAudioElement } from './utils.js';
+
 // DOM elements
 const powerToggle = document.getElementById('fmPowerToggle');
 const refreshBtn = document.getElementById('fmRefreshBtn');
@@ -56,10 +59,7 @@ const FMRadio = {
         });
 
         // Create and attach audio element only after server confirms
-        const audio = document.createElement('audio');
-        audio.controls = true;
-        const cacheBuster = Math.random().toString(36).substring(2, 15);
-        audio.src = `${FM_STREAM_URL}?nocache=${cacheBuster}`;
+        const audio = createAudioElement(FM_STREAM_URL);
         audioContainer.innerHTML = '';
         audioContainer.appendChild(audio);
 
