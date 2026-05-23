@@ -43,7 +43,7 @@ class Config:
 
 config = Config(
     host='localhost',
-    port=8080,
+    port=8081,
     max_inactivity=60,
 
     atc_radio=ATCRadioConfig(

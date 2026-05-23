@@ -202,6 +202,16 @@ input:disabled + .slider {
     font-weight: 600;
 }
 
+.fm-control-section {
+    margin-bottom: 24px;
+}
+
+.fm-control-section h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
 .fm-container {
     display: flex;
     align-items: center;
@@ -254,7 +264,7 @@ input:disabled + .slider {
 .fm-input-group {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     border: 2px solid var(--border-color);
     border-radius: 6px;
     padding: 8px 12px;
@@ -265,6 +275,27 @@ input:disabled + .slider {
 .fm-input-group:focus-within {
     border-color: var(--secondary-color);
     box-shadow: var(--shadow-lg);
+}
+
+.fm-input-group.invalid {
+    border-color: var(--danger-color);
+}
+
+.fm-input-group.invalid:focus-within {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+}
+
+.fm-arrow-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fm-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .fm-input {
@@ -281,10 +312,48 @@ input:disabled + .slider {
     color: var(--text-secondary);
 }
 
+.fm-input.invalid {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: var(--danger-color);
+}
+
 .fm-unit {
     font-size: 14px;
     color: var(--text-secondary);
     font-weight: 500;
+}
+
+.fm-arrow-btn {
+    background-color: var(--bg-light);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 6px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.fm-arrow-btn:hover:not(:disabled) {
+    background-color: var(--secondary-color);
+    border-color: #E65100;
+    color: white;
+    box-shadow: var(--shadow);
+}
+
+.fm-arrow-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.fm-arrow-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .frequencies-section h2 {

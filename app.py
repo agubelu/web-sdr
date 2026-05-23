@@ -22,7 +22,7 @@ def index():
         'freqs': config.atc_radio.freqs,
         'api_url': f'http://{config.host}:{config.port}'
     }
-    return render_template('atc_radio.html', **params)
+    return render_template('radio.html', **params)
 
 @app.get('/api/status')
 def get_status():
