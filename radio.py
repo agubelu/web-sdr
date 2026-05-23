@@ -12,6 +12,10 @@ class Radio:
     def teardown(self):
         ...
 
+    @abc.abstractmethod
+    def kind(self):
+        ...
+
 class ATCRadio(Radio):
     def __init__(self, freqs: list[str]):
         print(f'new radio with freqs {freqs}')
@@ -58,3 +62,6 @@ class ATCRadio(Radio):
         self.proc.wait()
         if self.proc.returncode != 0:
             raise OSError(f'Return code {self.proc.returncode}')
+
+    def kind(self):
+        return 'atc'
