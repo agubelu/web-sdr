@@ -60,6 +60,7 @@ def current_status() -> dict | None:
     global live_radio
     return None if live_radio is None else {
         'frequencies': live_radio.freqs,
+        'type': 'atc' if isinstance(live_radio, ATCRadio) else 'fm',
     }
 
 def create_or_replace_radio(data: dict):

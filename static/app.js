@@ -186,7 +186,7 @@ async function loadStateFromAPI() {
         return;
     }
 
-    if (data === null) {
+    if (data === null || data.type !== 'atc') {
         radioState.isOn = false;
     } else {
         radioState.isOn = true;
