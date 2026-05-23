@@ -122,7 +122,7 @@ function updateUI() {
     });
 }
 
-// Handler hook for radio ON - will be expanded to connect to backend
+// Handler hook for radio ON
 async function onRadioOn() {
     console.log('Radio turned ON');
 
@@ -153,7 +153,7 @@ async function onRadioOn() {
     updateUI();
 }
 
-// Handler hook for radio OFF - will be expanded to connect to backend
+// Handler hook for radio OFF
 async function onRadioOff() {
     console.log('Radio turned OFF');
     audioContainer.innerHTML = '';
@@ -194,6 +194,7 @@ async function loadStateFromAPI() {
 
     if (data === null || data.type !== 'atc') {
         radioState.isOn = false;
+        audioContainer.innerHTML = '';
     } else {
         radioState.isOn = true;
         radioState.selectedFrequencies = data['frequencies'];

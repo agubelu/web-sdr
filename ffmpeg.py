@@ -2,31 +2,37 @@ import signal
 import subprocess
 import sys
 
-from config import config
+from config import IcecastConfig
 from utils import build_icecast_mount_url
 
 proc = None
 
-def start_atc_silence_feed():
+def start_silence_feed(ic_config: IcecastConfig, *, bitrate: str, stereo: bool):
     global proc
+    shutdown_silence_feed()  # Terminate existing feed if it exists
 
-    icecast_config = config.atc_radio.icecast
-    icecast_url = build_icecast_mount_url(icecast_config, silence=True)
+    icecast_url = build_icecast_mount_url(ic_config, silence=True)
+    channel = 'stereo' if stereo else 'mono'
 
+    # Sample rate can remain fixed at 8000 because it doesn't matter for silence
     proc = subprocess.Popen([
         'ffmpeg', '-re',
-        '-f', 'lavfi', '-i', 'anullsrc=r=8000:cl=mono',
-        '-c:a', 'libmp3lame', '-b:a', '8k',
+        '-f', 'lavfi', '-i', f'anullsrc=r=8000:cl={channel}',
+        '-c:a', 'libmp3lame', '-b:a', bitrate,
         '-f', 'mp3', icecast_url
     ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     print('started silence feed')
-    signal.signal(signal.SIGTERM, shutdown_silence_feed)
-    signal.signal(signal.SIGINT, shutdown_silence_feed)
 
-def shutdown_silence_feed(sig, frame):
+def shutdown_silence_feed():
     global proc
     if proc:
-        print('terminating silence feed')
+        print('terminating active silence feed')
         proc.terminate()
         proc.wait()
+
+def handle_sigterm(_sig, _frame):
+    shutdown_silence_feed()
     sys.exit(0)
+
+signal.signal(signal.SIGTERM, handle_sigterm)
+signal.signal(signal.SIGINT, handle_sigterm)

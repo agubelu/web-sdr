@@ -97,7 +97,7 @@ def turn_radio_off():
 ###################################################################################
 
 if __name__ == '__main__':
-    ffmpeg.start_atc_silence_feed()
+    ffmpeg.start_silence_feed(config.atc_radio.icecast, bitrate='8k', stereo=False)
     app.run(
         host=config.host,
         port=config.port,
