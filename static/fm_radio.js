@@ -59,7 +59,7 @@ const FMRadio = {
         });
 
         // Create and attach audio element only after server confirms
-        await this.showPlayer(STREAM_URL);
+        await this.showPlayer();
 
         this.isLoading = false;
         this.isOn = true;
@@ -81,9 +81,9 @@ const FMRadio = {
         console.log('FM Radio turned OFF');
     },
 
-    async showPlayer(url) {
-        if (audioContainer.querySelector('null') !== null) return;  // Player already exists
-        await createAudioElement(url, audioContainer);
+    async showPlayer() {
+        if (audioContainer.querySelector('audio') !== null) return;  // Player already exists
+        await createAudioElement(STREAM_URL, audioContainer);
     },
 
     hidePlayer() {

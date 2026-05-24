@@ -107,9 +107,17 @@ class FMRadio(Radio):
 
     def teardown(self):
         print('tearing FM radio down')
-        for p in (self.ffmpeg_proc, self.softfm_proc):
-            p.terminate()
-            p.wait()
+        self.ffmpeg_proc.terminate();
+        self.ffmpeg_proc.wait();
+        if self.ffmpeg_proc.returncode not in (0, 15, 255):
+            # 15: SIGTERM, 255: no data written (happens if radio is turned off very quickly)
+            raise OSError(f'ffmpeg exit code {self.ffmpeg_proc.returncode}')
+
+        self.softfm_proc.terminate();
+        self.softfm_proc.wait();
+        if self.softfm_proc.returncode not in (0, -13):
+            # -13: consequence of SIGPIPE
+            raise OSError(f'softfm exit code {self.softfm_proc.returncode}')
 
     def kind(self):
         return 'fm'

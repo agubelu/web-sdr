@@ -9,6 +9,7 @@ async function createAudioElement(url, container) {
     await pollUntilExists(urlNoCache);
     const audio = document.createElement('audio');
     audio.controls = true;
+    audio.autoplay = true;
     audio.src = urlNoCache;
 
     container.innerHTML = '';
