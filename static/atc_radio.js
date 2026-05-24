@@ -19,7 +19,7 @@ const ATCRadio = {
         powerToggle.addEventListener('change', ev => this._handlePowerToggle(ev));
         refreshBtn.addEventListener('click', ev => this._handleRefreshButton(ev));
         this._renderFrequencies();
-        this.redraw();  // TODO: remove after api sync is re-added
+        this.redraw();
     },
 
     redraw() {

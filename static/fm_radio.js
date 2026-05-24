@@ -22,7 +22,7 @@ const FMRadio = {
         this.userChanges = false;
 
         this._attachListeners();
-        this.redraw();  // TODO: remove after api sync is re-added
+        this.redraw();
     },
 
     redraw() {
