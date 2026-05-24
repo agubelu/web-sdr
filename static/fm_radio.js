@@ -59,9 +59,7 @@ const FMRadio = {
         });
 
         // Create and attach audio element only after server confirms
-        const audio = createAudioElement(FM_STREAM_URL);
-        audioContainer.innerHTML = '';
-        audioContainer.appendChild(audio);
+        await this.showPlayer(STREAM_URL);
 
         this.isLoading = false;
         this.isOn = true;
@@ -73,12 +71,23 @@ const FMRadio = {
         if (!this.isOn) return;
 
         powerToggle.checked = false;
-        audioContainer.innerHTML = '';
+        this.hidePlayer();
+
         await fetch(`${API_BASE_URL}/api/fm/off`, { method: 'POST' });
         this.isOn = false;
         this.isLoading = false;
         this.redraw();
+
         console.log('FM Radio turned OFF');
+    },
+
+    async showPlayer(url) {
+        if (audioContainer.querySelector('null') !== null) return;  // Player already exists
+        await createAudioElement(url, audioContainer);
+    },
+
+    hidePlayer() {
+        audioContainer.innerHTML = '';
     },
 
     registerOtherRadios(radios) {
@@ -147,6 +156,7 @@ const FMRadio = {
         // Power button and refresh flush user changes
         this.userChanges = false;
         this.isLoading = true;
+        this.redraw();
 
         if (newState) {
             await this.turnOn();
@@ -159,7 +169,7 @@ const FMRadio = {
         if (!this.isOn) return;
         if (!validateFmFrequency(this.selectedFrequency)) {
             e.target.checked = false;
-            alert('Please enter a valid FM frequency (87.5 - 108.0 MHz)');
+            alert(`Please enter a valid FM frequency (${MIN_FREQ} - ${MAX_FREQ} MHz)`);
             return;
         }
 

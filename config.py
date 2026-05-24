@@ -31,20 +31,38 @@ class ATCRadioConfig:
     enable: bool
     rtl_config_file: str
     device: DeviceConfig
-    icecast: IcecastConfig
     freqs: tuple[ATCFrequency, ...]
+
+@dataclass(frozen=True, slots=True)
+class FMRadioConfig:
+    enable: bool
+    gain: float
+    sample_rate: int
+    bitrate: str
+    stereo: bool
 
 @dataclass(frozen=True, slots=True)
 class Config:
     host: str
     port: int
     max_inactivity: int
+    icecast: IcecastConfig
     atc_radio: ATCRadioConfig
+    fm_radio: FMRadioConfig
 
 config = Config(
     host='localhost',
     port=8081,
     max_inactivity=60,
+
+    icecast=IcecastConfig(
+        host='localhost',
+        port=8000,
+        username='source',
+        password='hackme',
+        live_mountpoint='feed.mp3',
+        silence_mountpoint='silence.mp3',
+    ),
 
     atc_radio=ATCRadioConfig(
         enable=True,
@@ -56,14 +74,6 @@ config = Config(
             fft_size=512,
             highpass=100,
             lowpass=3000,
-        ),
-        icecast=IcecastConfig(
-            host='localhost',
-            port=8000,
-            username='source',
-            password='hackme',
-            live_mountpoint='feed.mp3',
-            silence_mountpoint='silence.mp3',
         ),
         freqs=(
             ATCFrequency('118.105', 'LEZL TWR', squelch_snr=5),
@@ -81,6 +91,14 @@ config = Config(
 
             ATCFrequency('121.500', 'GUARD'),
         ),
+    ),
+
+    fm_radio=FMRadioConfig(
+        enable=True,
+        gain=29.7,
+        sample_rate=48000,
+        bitrate='128k',
+        stereo=True,
     )
 )
 

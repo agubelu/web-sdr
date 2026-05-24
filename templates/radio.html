@@ -83,8 +83,7 @@
     <script>
         const API_BASE_URL = '{{ api_url }}';
         const FREQUENCIES = {{ freqs | tojson }};
-        const ATC_STREAM_URL = '{{ atc_stream_url }}';
-        const FM_STREAM_URL = 'TODO';
+        const STREAM_URL = '{{ stream_url }}';
     </script>
     <script type="module" src="{{ url_for('static', filename='app.js') }}"></script>
 </body>

@@ -71,9 +71,7 @@ const ATCRadio = {
         });
 
         // Create and attach audio element only after server confirms
-        const audio = createAudioElement(ATC_STREAM_URL);
-        audioContainer.innerHTML = '';
-        audioContainer.appendChild(audio);
+        await this.showPlayer(STREAM_URL);
 
         this.isLoading = false;
         this.isOn = true;
@@ -85,7 +83,7 @@ const ATCRadio = {
         if (!this.isOn) return;
 
         powerToggle.checked = false;
-        audioContainer.innerHTML = '';
+        this.hidePlayer();
 
         await fetch(`${API_BASE_URL}/api/atc/off`, { method: 'POST' });
         this.isOn = false;
@@ -93,6 +91,15 @@ const ATCRadio = {
         this.redraw();
 
         console.log('ATC Radio turned OFF');
+    },
+
+    async showPlayer(url) {
+        if (audioContainer.querySelector('null') !== null) return;  // Player already exists
+        await createAudioElement(url, audioContainer);
+    },
+
+    hidePlayer() {
+        audioContainer.innerHTML = '';
     },
 
     registerOtherRadios(radios) {
@@ -146,6 +153,7 @@ const ATCRadio = {
         // Power button and refresh flush user changes
         this.userChanges = false;
         this.isLoading = true;
+        this.redraw();
 
         if (newState) {
             await this.turnOn();

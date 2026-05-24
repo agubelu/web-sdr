@@ -2,6 +2,7 @@ import abc
 import subprocess
 
 from config import ATCFrequency, config, rtlairband_config_file_template
+from utils import build_icecast_mount_url
 
 
 class Radio:
@@ -13,12 +14,12 @@ class Radio:
         ...
 
     @abc.abstractmethod
-    def kind(self):
+    def kind(self) -> str:
         ...
 
 class ATCRadio(Radio):
     def __init__(self, freqs: list[str]):
-        print(f'new radio with freqs {freqs}')
+        print(f'new ATC radio with freqs {freqs}')
         super().__init__(freqs)
         atc_config = config.atc_radio
 
@@ -28,7 +29,7 @@ class ATCRadio(Radio):
         ampfactors_list = ', '.join(str(f.ampfactor) for f in frequencies)
 
         device_config = atc_config.device
-        icecast_config = atc_config.icecast
+        icecast_config = config.icecast
 
         config_fmt = rtlairband_config_file_template.format(
             fft_size=device_config.fft_size,
@@ -57,7 +58,7 @@ class ATCRadio(Radio):
                                      stderr=subprocess.DEVNULL)
 
     def teardown(self):
-        print('tearing radio down')
+        print('tearing ATC radio down')
         self.proc.terminate()
         self.proc.wait()
         if self.proc.returncode != 0:
@@ -65,3 +66,50 @@ class ATCRadio(Radio):
 
     def kind(self):
         return 'atc'
+
+class FMRadio(Radio):
+    def __init__(self, freqs: list[str]):
+        assert len(freqs) == 1, 'only one frequency at a time is supported in FM radio'
+        print(f'new FM radio with freq {freqs}')
+        super().__init__(freqs)
+
+        freq_hz = int(float(freqs[0]) * 1e6)
+        softfm_args = [
+            'softfm',
+            '-f', str(freq_hz),
+            '-g', str(config.fm_radio.gain),
+            '-r', str(config.fm_radio.sample_rate),
+            '-R', '-',
+        ]
+
+        ffmpeg_args = [
+            'ffmpeg',
+            '-hide_banner',
+            '-nostats',
+            '-f', 's16le',
+            '-ar', str(config.fm_radio.sample_rate),
+            '-ac', '2' if config.fm_radio.stereo else '1',
+            '-i', 'pipe:0',
+            '-codec:a', 'libmp3lame',
+            '-b:a', config.fm_radio.bitrate,
+            '-f', 'mp3',
+            build_icecast_mount_url(config.icecast, silence=False)
+        ]
+
+        self.softfm_proc = subprocess.Popen(softfm_args,
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.DEVNULL)
+        self.ffmpeg_proc = subprocess.Popen(ffmpeg_args,
+                                            stdin=self.softfm_proc.stdout,
+                                            stderr=subprocess.DEVNULL)
+        # Allow softfm to receive SIGPIPE if ffmpeg exits early
+        self.softfm_proc.stdout.close()  # type: ignore
+
+    def teardown(self):
+        print('tearing FM radio down')
+        for p in (self.ffmpeg_proc, self.softfm_proc):
+            p.terminate()
+            p.wait()
+
+    def kind(self):
+        return 'fm'

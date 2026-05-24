@@ -4,7 +4,7 @@ from flask import Flask, jsonify, render_template, request
 
 import ffmpeg
 from config import config
-from radio import ATCRadio, Radio
+from radio import ATCRadio, FMRadio, Radio
 from utils import build_icecast_stream_url
 
 app = Flask(__name__)
@@ -18,8 +18,7 @@ off_timer: Timer | None = None
 @app.route('/')
 def index():
     params = {
-        'atc_stream_url': build_icecast_stream_url(config.atc_radio.icecast),
-        # TODO: 'fm_stream_url': build_icecast_stream_url(config...icecast),
+        'stream_url': build_icecast_stream_url(config.icecast),
         'freqs': config.atc_radio.freqs,
         'api_url': f'http://{config.host}:{config.port}'
     }
@@ -34,7 +33,7 @@ def get_status():
 @app.post('/api/<kind>/on')
 def post_control_on(kind: str):
     with radio_lock:
-        create_or_replace_radio(request.get_json())
+        create_or_replace_radio(kind, request.get_json())
     return '', 204
 
 @app.post('/api/<kind>/off')
@@ -62,14 +61,25 @@ def current_status() -> dict | None:
         'type': live_radio.kind(),
     }
 
-def create_or_replace_radio(data: dict):
-    print(f'upserting radio')
+def create_or_replace_radio(kind: str, data: dict):
     global live_radio, off_timer
+    print(f'upserting radio')
+    assert kind in ('atc', 'fm')
+    previous_kind = None
 
     if live_radio:
+        previous_kind = live_radio.kind()
         live_radio.teardown()
+
+    if previous_kind != kind:
+        ffmpeg.stop_silence_feed()
+        sample_rate = config.fm_radio.sample_rate if kind == 'fm' else 8000
+        bitrate = config.fm_radio.bitrate if kind == 'fm' else '8k'
+        stereo = kind == 'fm'
+        ffmpeg.start_silence_feed(config.icecast, sample_rate, bitrate, stereo)
+
     freqs = data['frequencies']
-    live_radio = ATCRadio(freqs)
+    live_radio = ATCRadio(freqs) if kind == 'atc' else FMRadio(freqs)
 
     reset_timer()
 
@@ -91,6 +101,7 @@ def turn_radio_off():
     if live_radio:
         live_radio.teardown()
         live_radio = None
+        ffmpeg.stop_silence_feed()
     if off_timer:
         off_timer.cancel()
         off_timer = None
@@ -98,7 +109,6 @@ def turn_radio_off():
 ###################################################################################
 
 if __name__ == '__main__':
-    ffmpeg.start_silence_feed(config.atc_radio.icecast, bitrate='8k', stereo=False)
     app.run(
         host=config.host,
         port=config.port,
