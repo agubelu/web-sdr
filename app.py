@@ -20,7 +20,9 @@ def index():
     params = {
         'stream_url': build_icecast_stream_url(config.icecast),
         'freqs': config.atc_radio.freqs,
-        'api_url': f'http://{config.host}:{config.port}'
+        'api_url': f'http://{config.host}:{config.port}',
+        'enable_atc': config.atc_radio.enable,
+        'enable_fm': config.fm_radio.enable,
     }
     return render_template('radio.html', **params)
 

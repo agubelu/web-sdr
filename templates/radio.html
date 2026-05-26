@@ -10,7 +10,7 @@
 
 <body>
     <div class="container">
-        <div class="radio-player">
+        <div class="radio-player"{% if not enable_atc %} style="display: none"{% endif %}>
             <div class="status-bar">
                 <div class="status-info">
                     <span id="atcStatusText" class="status-text">ATC Radio OFF</span>
@@ -42,7 +42,7 @@
         </div>
 
         <br>
-        <div class="radio-player">
+        <div class="radio-player"{% if not enable_fm %} style="display: none"{% endif %}>
             <div class="status-bar">
                 <div class="status-info">
                     <span id="fmStatusText" class="status-text">FM Radio OFF</span>
