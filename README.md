@@ -19,5 +19,32 @@ Main features:
 - **For airband radio:** [RTLSDR-Airband](https://github.com/rtl-airband/RTLSDR-Airband)
 - **For FM radio:** [SoftFM](https://github.com/zf-lab/SoftFM) (if you're using a headless device, consider using [this fork](https://github.com/agubelu/SoftFM) which removes the ALSA dependency)
 
+# Icecast and stream continuity
+
+When switching frequencies, the underlying `rtl_airband` or `softfm` process is terminated and re-spawned with the new configuration. This causes the icecast stream to stop and re-start, which would normally require a refresh on the client side.
+
+In order to have a continuous stream and switch frequences seamlessly without restarting the client, we use ffmpeg to generate a silence loop that is used as fallback for the main audio stream. This requires configuring icecast to automatically transition listeners to the silence loop when the live stream stops and back again when it restarts.
+
+To do this, add these sections to the icecast config file (normally `/etc/icecast2/icecast.xml`), inside the main `<icecast>` tag:
+
+```xml
+<mount type="normal">
+    <mount-name>/feed.mp3</mount-name>
+    <fallback-mount>/silence.mp3</fallback-mount>
+    <fallback-override>1</fallback-override>
+    <!-- How long to wait before considering source dead -->
+    <source-timeout>10</source-timeout>
+</mount>
+
+<mount type="normal">
+    <mount-name>/silence.mp3</mount-name>
+    <!-- Prevent the silence mount from appearing in public listings -->
+    <public>0</public>
+    <hidden>1</hidden>
+</mount>
+```
+
+The names for the `/feed.mp3` and `/silence.mp3` feeds can be changed, but they must also be updated in the `icecast.{live,silence}_mountpoint` parameters in `config.py`.
+
 # Disclaimer
 Many jurisdictions forbid publicly rebroadcasting ATC communications. When using this software, please make sure to comply with all applicable local laws and regulations.
