@@ -13,6 +13,7 @@ async function init() {
 
     syncUI();
     setInterval(syncUI, 15 * 1000);
+    registerMediaSession();
 }
 
 async function syncUI() {
@@ -45,6 +46,19 @@ async function getApiStatus() {
     let resp = await fetch(`${API_BASE_URL}/api/status`);
     let data = await resp.json();
     return data;
+}
+
+function registerMediaSession() {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'Live Radio',
+            artist: 'SDR',
+        });
+
+        // These handlers are required on some browsers to keep the session alive
+        navigator.mediaSession.setActionHandler('play', () => audio.play());
+        navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
