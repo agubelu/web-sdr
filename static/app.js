@@ -13,7 +13,6 @@ async function init() {
 
     syncUI();
     setInterval(syncUI, 15 * 1000);
-    registerMediaSession();
 }
 
 async function syncUI() {
@@ -39,19 +38,6 @@ async function syncUI() {
             ATCRadio.selectedFrequencies = data.frequencies;
             ATCRadio.redraw();
         }
-    }
-}
-
-function registerMediaSession() {
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: 'Live Radio',
-            artist: 'SDR',
-        });
-
-        // These handlers are required on some browsers to keep the session alive
-        navigator.mediaSession.setActionHandler('play', () => audio.play());
-        navigator.mediaSession.setActionHandler('pause', () => audio.pause());
     }
 }
 

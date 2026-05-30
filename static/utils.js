@@ -12,6 +12,17 @@ async function createAudioElement(url, container) {
     audio.autoplay = true;
     audio.src = urlNoCache;
 
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'Live Radio',
+            artist: 'SDR',
+        });
+
+        // These handlers are required on some browsers to keep the session alive
+        navigator.mediaSession.setActionHandler('play', () => audio.play());
+        navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+    }
+
     container.innerHTML = '';
     container.appendChild(audio);
 }
