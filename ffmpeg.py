@@ -2,7 +2,7 @@ import signal
 import subprocess
 import sys
 
-from config_base import IcecastConfig
+from config import IcecastConfig
 from utils import build_icecast_mount_url
 
 proc = None

@@ -1,8 +1,7 @@
 import abc
 import subprocess
 
-from config import config
-from config_base import ATCFrequency, rtlairband_config_file_template
+from config import ATCFrequency, config, rtlairband_config_file_template
 from utils import build_icecast_mount_url
 
 

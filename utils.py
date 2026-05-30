@@ -1,4 +1,4 @@
-from config_base import IcecastConfig
+from config import IcecastConfig
 
 
 def build_icecast_mount_url(icecast_config: IcecastConfig, *, silence: bool = False) -> str:
