@@ -12,8 +12,8 @@ async function init() {
     FMRadio.registerOtherRadios([ATCRadio]);
 
     syncUI();
+    setInterval(syncUI, 15 * 1000);
     registerMediaSession();
-    setInterval(syncWhenOff, 15000);
 }
 
 async function syncUI() {
@@ -46,15 +46,6 @@ async function getApiStatus() {
     let resp = await fetch(`${API_BASE_URL}/api/status`);
     let data = await resp.json();
     return data;
-}
-
-async function syncWhenOff() {
-    // This allows the radio status to be synced when both are off.
-    // When at least one is on, status sync is bound to the audio player's timeupdate event,
-    // which fires even when the browser is in the background on a mobile device.
-    if (!ATCRadio.isOn && !FMRadio.isOn) {
-        syncUI();
-    }
 }
 
 function registerMediaSession() {
@@ -105,5 +96,3 @@ function fmOn() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', init);
-
-export { syncUI };
