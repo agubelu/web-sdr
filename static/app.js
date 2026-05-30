@@ -17,8 +17,8 @@ async function init() {
 }
 
 async function syncUI() {
-    // This API call also lets the server know we're still listening so the radio isn't auto turned-off
-    let data = await getApiStatus();
+    let resp = await fetch(`${API_BASE_URL}/api/status`);
+    let data = await resp.json();
 
     if (data === null) {
         // Both radios OFF
@@ -40,12 +40,6 @@ async function syncUI() {
             ATCRadio.redraw();
         }
     }
-}
-
-async function getApiStatus() {
-    let resp = await fetch(`${API_BASE_URL}/api/status`);
-    let data = await resp.json();
-    return data;
 }
 
 function registerMediaSession() {

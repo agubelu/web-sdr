@@ -38,9 +38,6 @@ To do this, add these sections to the icecast config file (normally `/etc/icecas
 
 <mount type="normal">
     <mount-name>/silence.mp3</mount-name>
-    <!-- Prevent the silence mount from appearing in public listings -->
-    <public>0</public>
-    <hidden>1</hidden>
 </mount>
 ```
 

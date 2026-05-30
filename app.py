@@ -5,13 +5,13 @@ from flask import Flask, jsonify, render_template, request
 import ffmpeg
 from config import config
 from radio import ATCRadio, FMRadio, Radio
-from utils import build_icecast_stream_url
+from utils import build_icecast_stream_url, radio_has_listeners
 
 app = Flask(__name__)
 
 radio_lock = Lock()
 live_radio: Radio | None = None
-off_timer: Timer | None = None
+inactivity_check: Timer | None = None
 
 ##### Route handling #####
 
@@ -29,7 +29,6 @@ def index():
 @app.get('/api/status')
 def get_status():
     with radio_lock:
-        reset_timer()
         return jsonify(current_status())
 
 @app.post('/api/<kind>/on')
@@ -47,12 +46,18 @@ def post_control_off(kind: str):
 ##### Handler for inactivity timer #####
 
 def off_timer_handle():
-    print('off timer triggered')
-    global off_timer
+    print('inactivity check')
+    global inactivity_check
+    inactivity_check = None
 
-    off_timer = None
-    with radio_lock:
-        turn_radio_off()
+    # Is anyone still listening?
+    if radio_has_listeners(config.icecast):
+        print('radio still has listeners')
+        reset_timer()  # Rearm timer and check again later
+    else:
+        print('auto-shutdown')
+        with radio_lock:
+            turn_radio_off()
 
 ##### Aux functions which must be called holding `radio_lock` #####
 
@@ -64,7 +69,7 @@ def current_status() -> dict | None:
     }
 
 def create_or_replace_radio(kind: str, data: dict):
-    global live_radio, off_timer
+    global live_radio, inactivity_check
     print(f'upserting radio')
     assert kind in ('atc', 'fm')
     previous_kind = None
@@ -87,26 +92,26 @@ def create_or_replace_radio(kind: str, data: dict):
 
 def reset_timer():
     print('resetting timer')
-    global off_timer
+    global inactivity_check
 
-    if off_timer:
-        off_timer.cancel()
+    if inactivity_check:
+        inactivity_check.cancel()
 
-    off_timer = Timer(config.max_inactivity, off_timer_handle)
-    off_timer.daemon = True
-    off_timer.start()
+    inactivity_check = Timer(config.inactivity_poll_period, off_timer_handle)
+    inactivity_check.daemon = True
+    inactivity_check.start()
 
 def turn_radio_off():
     print('turning radio off')
-    global live_radio, off_timer
+    global live_radio, inactivity_check
 
     if live_radio:
         live_radio.teardown()
         live_radio = None
         ffmpeg.stop_silence_feed()
-    if off_timer:
-        off_timer.cancel()
-        off_timer = None
+    if inactivity_check:
+        inactivity_check.cancel()
+        inactivity_check = None
 
 ###################################################################################
 

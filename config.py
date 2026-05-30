@@ -45,7 +45,7 @@ class FMRadioConfig:
 class Config:
     host: str
     port: int
-    max_inactivity: int
+    inactivity_poll_period: int
     icecast: IcecastConfig
     atc_radio: ATCRadioConfig
     fm_radio: FMRadioConfig
@@ -54,7 +54,7 @@ class Config:
 config = Config(
     host='localhost',
     port=8080,
-    max_inactivity=60,
+    inactivity_poll_period=60,
 
     icecast=IcecastConfig(
         host='localhost',
